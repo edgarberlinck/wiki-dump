@@ -4,6 +4,7 @@ venv
 __pycache__
 *.py[cod]
 *.pdf
+out
 .env
 .env.*
 .DS_Store

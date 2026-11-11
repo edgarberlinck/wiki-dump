@@ -35,7 +35,8 @@ make dump
 
 That's it. The image builds, Gotenberg starts, and the exporter waits for it to
 be healthy. The default subject is **The Ramones**, and the PDF is written to
-`The_Ramones.pdf` in the project directory.
+`out/The_Ramones.pdf` in the project directory. The output directory is created
+automatically.
 
 Choose a subject and traversal limits:
 
@@ -67,7 +68,7 @@ make dump subject="The Ramones" depth=1 max_articles=1000
 Choose an output filename:
 
 ```sh
-make dump subject="Punk rock" ARGS="--output punk-rock.pdf"
+make dump subject="Punk rock" ARGS="--output out/punk-rock.pdf"
 ```
 
 Gotenberg stays running for subsequent exports. Stop it when you're done:
@@ -76,7 +77,8 @@ Gotenberg stays running for subsequent exports. Stop it when you're done:
 docker compose down
 ```
 
-Generated PDFs and local environments are excluded from Git.
+Generated PDFs and local environments are excluded from Git. Everything in
+`out/` is ignored except the `.gitkeep` placeholder.
 
 ## Using the output for chatbots
 

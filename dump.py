@@ -213,6 +213,7 @@ def write_pdf(html: str, output: Path, gotenberg_url: str):
     response.raise_for_status()
     if not response.content.startswith(b"%PDF-"):
         raise RuntimeError("Gotenberg returned a non-PDF response")
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(response.content)
 
 
@@ -246,13 +247,15 @@ def main(argv=None):
         default=os.environ.get("GOTENBERG_URL", "http://127.0.0.1:3000"),
         help="Gotenberg base URL (default: GOTENBERG_URL or http://127.0.0.1:3000)",
     )
-    parser.add_argument("--output", type=Path, help="output PDF path")
+    parser.add_argument(
+        "--output", type=Path, help="output PDF path (default: out/<subject>.pdf)"
+    )
     args = parser.parse_args(argv)
     subject = " ".join(args.subject).strip()
     if not subject:
         parser.error("subject must not be empty")
     filename = re.sub(r"[^\w.-]+", "_", subject).strip("._") or "wikipedia"
-    output = args.output or Path(f"{filename}.pdf")
+    output = args.output or Path("out") / f"{filename}.pdf"
     client = WikipediaClient()
     try:
         title = client.resolve_title(subject)

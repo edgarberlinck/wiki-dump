@@ -165,7 +165,7 @@ class PdfTests(unittest.TestCase):
     def test_posts_utf8_html_to_gotenberg(self, post):
         post.return_value.content = b"%PDF-1.7\nexample"
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "dump.pdf"
+            output = Path(directory) / "out" / "nested" / "dump.pdf"
             dump.write_pdf("<html>História</html>", output, "http://gotenberg:3000/")
             self.assertEqual(output.read_bytes(), b"%PDF-1.7\nexample")
         self.assertEqual(
@@ -186,6 +186,24 @@ class PdfTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "non-PDF"):
                 dump.write_pdf("html", output, "http://gotenberg:3000")
             self.assertEqual(output.read_bytes(), b"existing")
+
+
+class CliTests(unittest.TestCase):
+    @patch("dump.write_pdf")
+    @patch("dump.WikipediaClient")
+    def test_default_output_directory_and_explicit_override(self, client_class, write_pdf):
+        client = client_class.return_value
+        client.resolve_title.return_value = "Ramones"
+        client.fetch_article.return_value = dump.Article(1, "Ramones", "<p>Band</p>", [])
+        for options, expected in [
+            ([], Path("out/The_Ramones.pdf")),
+            (["--output", "custom/band.pdf"], Path("custom/band.pdf")),
+        ]:
+            with self.subTest(options=options):
+                with contextlib.redirect_stdout(StringIO()):
+                    result = dump.main(["The Ramones", *options])
+                self.assertEqual(result, 0)
+                self.assertEqual(write_pdf.call_args.args[1], expected)
 
 
 if __name__ == "__main__":
