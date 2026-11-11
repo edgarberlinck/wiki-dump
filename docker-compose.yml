@@ -1,0 +1,22 @@
+services:
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  wiki:
+    build: .
+    environment:
+      SUBJECT: "${SUBJECT:-The Ramones}"
+      GOTENBERG_URL: "http://gotenberg:3000"
+    depends_on:
+      gotenberg:
+        condition: service_healthy
+    volumes:
+      - .:/work
+    working_dir: /work
